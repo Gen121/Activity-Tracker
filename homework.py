@@ -26,6 +26,7 @@ class Training(object):
     """Базовый класс тренировки."""
     LEN_STEP = 0.65
     M_IN_KM = 1000
+    MIN_IN_HOUR = 60
 
     def __init__(
         self,
@@ -47,7 +48,7 @@ class Training(object):
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        pass
+        raise NotImplementedError("<Method must be implemented in a child>")
 
     def show_training_info(self) -> InfoMessage:
         """Вернуть информационное сообщение о выполненной тренировке."""
@@ -62,20 +63,27 @@ class Training(object):
 
 class Running(Training):
     """Тренировка: бег."""
+    MULT_COEF_CALORIE_SPEED = 18
+    SUBTRAHEND_COEF_CALORIE_SPEED = 20
+
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий при беге."""
-        # Calculation by the formula: (18 * average_speed - 20)
+        # Calculation by the formula: (coef_18 * average_speed - coef_20)
         # * weight / M_IN_KM * duration_in_minutes
-        coef_calorie_1 = 18
-        coef_calorie_2 = 20
         average_speed = self.get_mean_speed()
-        duration_in_minutes = self.duration * 60
-        return ((coef_calorie_1 * average_speed - coef_calorie_2)
-                * self.weight / self.M_IN_KM * duration_in_minutes)
+        duration_in_minutes = self.duration * self.MIN_IN_HOUR
+        return ((self.MULT_COEF_CALORIE_SPEED * average_speed
+                - self.SUBTRAHEND_COEF_CALORIE_SPEED)
+                * self.weight / self.M_IN_KM
+                * duration_in_minutes)
 
 
 class SportsWalking(Training):
     """Тренировка: спортивная ходьба."""
+    MULT_COEF_CALORIE_WEIGH = 0.035
+    SQUARE_COEF_CALORIE_SPEED = 2
+    MULT_COEF_CALORIE_GENERAL = 0.029
+
     def __init__(self, action: int, duration: float, weight: float,
                  height: float) -> None:
         super().__init__(action, duration, weight)
@@ -83,21 +91,23 @@ class SportsWalking(Training):
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий при хотьбе."""
-        # Calculation by the formula: (0.035 * weight +
-        # (average_speed**2 // height) * 0.029 * weight) * duration_in_minutes
-        coef_calorie_1 = 0.035
-        coef_calorie_2 = 2
-        coef_calorie_3 = 0.029
+        # Calculation by the formula: (coef_0.035 * weight +
+        # (average_speed ** coef_2 // height) * coef_0.029 * weight)
+        # * duration_in_minutes
         average_speed = self.get_mean_speed()
-        duration_in_minutes = self.duration * 60
-        return ((coef_calorie_1 * self.weight
-                + (average_speed**coef_calorie_2 // self.height)
-                * coef_calorie_3 * self.weight) * duration_in_minutes)
+        duration_in_minutes = self.duration * self.MIN_IN_HOUR
+        return ((self.MULT_COEF_CALORIE_WEIGH * self.weight
+                + (average_speed ** self.SQUARE_COEF_CALORIE_SPEED
+                 // self.height)
+                * self.MULT_COEF_CALORIE_GENERAL * self.weight)
+                * duration_in_minutes)
 
 
 class Swimming(Training):
     """Тренировка: плавание."""
     LEN_STEP = 1.38
+    TERM_COEF_CALORIE_SPEED = 1.1
+    MULT_COEF_CALORIE_GENERAL = 2
 
     def __init__(self, action: int, duration: float, weight: float,
                  length_pool: float, count_pool: float) -> None:
@@ -112,10 +122,9 @@ class Swimming(Training):
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий при хотьбе."""
-        coef_calorie_1 = 1.1
-        coef_calorie_2 = 2
-        return ((self.get_mean_speed() + coef_calorie_1)
-                * coef_calorie_2 * self.weight)
+        # Calculation by the formula: (average_speed + 1.1) * 2 * weight
+        return ((self.get_mean_speed() + self.TERM_COEF_CALORIE_SPEED)
+                * self.MULT_COEF_CALORIE_GENERAL * self.weight)
 
 
 def read_package(workout_type: str, data: list) -> Training:
@@ -125,7 +134,12 @@ def read_package(workout_type: str, data: list) -> Training:
         'RUN': Running,
         'WLK': SportsWalking,
     }
-    return workout_type_dict[workout_type](*data)
+    if workout_type in workout_type_dict:
+        return workout_type_dict[workout_type](*data)
+    else:
+        print('<KeyError! A valid training code is required>')
+        print('<The default function will be called>')
+        return Running(15000, 1, 75)
 
 
 def main(training: Training) -> None:
