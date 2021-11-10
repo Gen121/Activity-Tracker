@@ -137,9 +137,7 @@ def read_package(workout_type: str, data: list) -> Training:
     if workout_type in workout_type_dict:
         return workout_type_dict[workout_type](*data)
     else:
-        print('<KeyError! A valid training code is required>')
-        print('<The default function will be called>')
-        return Running(15000, 1, 75)
+        raise KeyError('A valid training code is required')
 
 
 def main(training: Training) -> None:
