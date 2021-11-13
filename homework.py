@@ -1,18 +1,15 @@
+from dataclasses import dataclass
+from typing import ClassVar
+
+
+@dataclass
 class InfoMessage(object):
-    """Информационное сообщение о тренировке."""
-    def __init__(
-        self,
-        training_type: str,
-        duration: float,
-        distance: float,
-        speed: float,
-        calories: float,
-    ) -> None:
-        self.training_type = training_type
-        self.duration = duration
-        self.distance = distance
-        self.speed = speed
-        self.calories = calories
+    """Информационное сообщение о тренировке."""    
+    training_type: str
+    duration: float
+    distance: float
+    speed: float
+    calories: float
 
     def get_message(self) -> str:
         return (f'Тип тренировки: {self.training_type}; '
@@ -22,21 +19,16 @@ class InfoMessage(object):
                 f'Потрачено ккал: {self.calories:.3f}.')
 
 
+@dataclass
 class Training(object):
     """Базовый класс тренировки."""
-    LEN_STEP = 0.65
-    M_IN_KM = 1000
-    MIN_IN_HOUR = 60
+    action: int
+    duration: float
+    weight: float
 
-    def __init__(
-        self,
-        action: int,
-        duration: float,
-        weight: float,
-    ) -> None:
-        self.action = action
-        self.duration = duration
-        self.weight = weight
+    LEN_STEP: ClassVar[float] = 0.65
+    M_IN_KM: ClassVar[int] = 1000
+    MIN_IN_HOUR: ClassVar[int] = 60
 
     def get_distance(self) -> float:
         """Получить дистанцию в км."""
@@ -61,10 +53,11 @@ class Training(object):
         )
 
 
+@dataclass
 class Running(Training):
     """Тренировка: бег."""
-    MULT_COEF_CALORIE_SPEED = 18
-    SUBTRAHEND_COEF_CALORIE_SPEED = 20
+    MULT_COEF_CALORIE_SPEED: ClassVar[int] = 18
+    SUBTRAHEND_COEF_CALORIE_SPEED: ClassVar[int] = 20
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий при беге."""
@@ -78,16 +71,14 @@ class Running(Training):
                 * duration_in_minutes)
 
 
+@dataclass
 class SportsWalking(Training):
     """Тренировка: спортивная ходьба."""
-    MULT_COEF_CALORIE_WEIGH = 0.035
-    SQUARE_COEF_CALORIE_SPEED = 2
-    MULT_COEF_CALORIE_GENERAL = 0.029
+    height: float
 
-    def __init__(self, action: int, duration: float, weight: float,
-                 height: float) -> None:
-        super().__init__(action, duration, weight)
-        self.height = height
+    MULT_COEF_CALORIE_WEIGH: ClassVar[float] = 0.035
+    SQUARE_COEF_CALORIE_SPEED: ClassVar[int] = 2
+    MULT_COEF_CALORIE_GENERAL: ClassVar[float] = 0.029
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий при хотьбе."""
@@ -103,17 +94,15 @@ class SportsWalking(Training):
                 * duration_in_minutes)
 
 
+@dataclass
 class Swimming(Training):
     """Тренировка: плавание."""
-    LEN_STEP = 1.38
-    TERM_COEF_CALORIE_SPEED = 1.1
-    MULT_COEF_CALORIE_GENERAL = 2
+    length_pool: float
+    count_pool: float
 
-    def __init__(self, action: int, duration: float, weight: float,
-                 length_pool: float, count_pool: float) -> None:
-        super().__init__(action, duration, weight)
-        self.length_pool = length_pool
-        self.count_pool = count_pool
+    LEN_STEP: ClassVar[float] = 1.38
+    TERM_COEF_CALORIE_SPEED: ClassVar[float] = 1.1
+    MULT_COEF_CALORIE_GENERAL: ClassVar[int] = 2
 
     def get_mean_speed(self) -> float:
         """Получить среднюю скорость движения."""
