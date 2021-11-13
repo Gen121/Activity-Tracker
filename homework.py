@@ -4,7 +4,7 @@ from typing import ClassVar
 
 @dataclass
 class InfoMessage(object):
-    """Информационное сообщение о тренировке."""    
+    """Информационное сообщение о тренировке."""
     training_type: str
     duration: float
     distance: float
@@ -125,8 +125,7 @@ def read_package(workout_type: str, data: list) -> Training:
     }
     if workout_type in workout_type_dict:
         return workout_type_dict[workout_type](*data)
-    else:
-        raise KeyError('A valid training code is required')
+    raise KeyError('A valid training code is required')
 
 
 def main(training: Training) -> None:
